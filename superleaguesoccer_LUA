@@ -1,38 +1,76 @@
--- Função Speed Boost com medidas de segurança
-local speedEnabled = false  -- Controle do estado de velocidade
-local defaultSpeed = 16     -- Velocidade padrão do jogador (ajuste conforme necessário)
-local boostSpeed = 24       -- Velocidade de boost mais segura (não exagere para evitar kick)
-local boostDuration = 5     -- Duração do boost em segundos
-local cooldown = 10         -- Intervalo antes de usar o boost novamente
+-- Criação do Painel para Speed Boost
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local SpeedBoostButton = Instance.new("TextButton")
+local CooldownLabel = Instance.new("TextLabel")
 
-SpeedBoostButton.MouseButton1Click:Connect(function()
-    if speedEnabled then
-        print("Boost de velocidade já está ativo!")
+ScreenGui.Name = "SuperLeagueSpeedBoostHub"
+ScreenGui.Parent = game.CoreGui
+
+-- Configuração do Painel
+MainFrame.Size = UDim2.new(0, 200, 0, 150)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
+MainFrame.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+MainFrame.Parent = ScreenGui
+
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.BackgroundColor3 = Color3.new(0.25, 0.25, 0.25)
+TitleLabel.Text = "Super League Soccer - Speed Boost"
+TitleLabel.Parent = MainFrame
+
+SpeedBoostButton.Size = UDim2.new(1, -10, 0, 40)
+SpeedBoostButton.Position = UDim2.new(0, 5, 0, 40)
+SpeedBoostButton.BackgroundColor3 = Color3.new(0.2, 0.6, 1)
+SpeedBoostButton.Text = "Ativar Speed Boost"
+SpeedBoostButton.Parent = MainFrame
+
+CooldownLabel.Size = UDim2.new(1, -10, 0, 30)
+CooldownLabel.Position = UDim2.new(0, 5, 0, 90)
+CooldownLabel.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+CooldownLabel.Text = "Cooldown: Pronto"
+CooldownLabel.Parent = MainFrame
+
+-- Configurações de Boost e Segurança
+local speedBoostEnabled = false
+local normalSpeed = 16 -- velocidade padrão
+local boostedSpeed = 20 -- velocidade com boost seguro
+local duration = 5 -- duração do boost em segundos
+local cooldown = 10 -- tempo de espera entre boosts
+
+local function applySpeedBoost()
+    if speedBoostEnabled then
+        print("Speed Boost já está em cooldown.")
         return
     end
-
-    speedEnabled = true
-    print("Speed Boost ativado com segurança!")
     
-    -- Aplicar o boost gradual
+    speedBoostEnabled = true
+    SpeedBoostButton.Text = "Speed Boost Ativado!"
+    CooldownLabel.Text = "Cooldown: Em andamento..."
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:FindFirstChildOfClass("Humanoid")
-
+    
     if humanoid then
-        -- Aumentar a velocidade
-        humanoid.WalkSpeed = boostSpeed
-        wait(boostDuration)
+        local originalSpeed = humanoid.WalkSpeed
+        humanoid.WalkSpeed = boostedSpeed
+        print("Speed Boost ativado com segurança!")
         
-        -- Retornar à velocidade normal
-        humanoid.WalkSpeed = defaultSpeed
-        print("Speed Boost desativado, cooldown iniciado.")
+        -- Restaurar velocidade e iniciar cooldown
+        wait(duration)
+        humanoid.WalkSpeed = originalSpeed
+        print("Speed Boost desativado.")
+        SpeedBoostButton.Text = "Ativar Speed Boost"
         
-        -- Iniciar o cooldown antes de poder ativar novamente
-        wait(cooldown)
-    else
-        print("Erro: humanoid não encontrado.")
+        -- Contagem de cooldown
+        for i = cooldown, 1, -1 do
+            CooldownLabel.Text = "Cooldown: " .. i .. "s"
+            wait(1)
+        end
+        
+        CooldownLabel.Text = "Cooldown: Pronto"
+        speedBoostEnabled = false
     end
+end
 
-    speedEnabled = false
-end)
+SpeedBoostButton.MouseButton1Click:Connect(applySpeedBoost)
