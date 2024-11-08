@@ -1,0 +1,38 @@
+-- Função Speed Boost com medidas de segurança
+local speedEnabled = false  -- Controle do estado de velocidade
+local defaultSpeed = 16     -- Velocidade padrão do jogador (ajuste conforme necessário)
+local boostSpeed = 24       -- Velocidade de boost mais segura (não exagere para evitar kick)
+local boostDuration = 5     -- Duração do boost em segundos
+local cooldown = 10         -- Intervalo antes de usar o boost novamente
+
+SpeedBoostButton.MouseButton1Click:Connect(function()
+    if speedEnabled then
+        print("Boost de velocidade já está ativo!")
+        return
+    end
+
+    speedEnabled = true
+    print("Speed Boost ativado com segurança!")
+    
+    -- Aplicar o boost gradual
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+    if humanoid then
+        -- Aumentar a velocidade
+        humanoid.WalkSpeed = boostSpeed
+        wait(boostDuration)
+        
+        -- Retornar à velocidade normal
+        humanoid.WalkSpeed = defaultSpeed
+        print("Speed Boost desativado, cooldown iniciado.")
+        
+        -- Iniciar o cooldown antes de poder ativar novamente
+        wait(cooldown)
+    else
+        print("Erro: humanoid não encontrado.")
+    end
+
+    speedEnabled = false
+end)
