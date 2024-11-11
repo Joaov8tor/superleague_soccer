@@ -1,0 +1,162 @@
+-- Criação do GUI principal
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BrookhavenHub"
+ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+-- Criação do frame principal do painel
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Visible = false  -- Inicialmente oculto
+MainFrame.Parent = ScreenGui
+
+-- Título do painel
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Title.Text = "Brookhaven Hub"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.Parent = MainFrame
+
+-- Criação do botão para abrir/fechar o painel
+local PanelButton = Instance.new("TextButton")
+PanelButton.Size = UDim2.new(0, 100, 0, 40)
+PanelButton.Position = UDim2.new(0.5, -50, 0, 10)
+PanelButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+PanelButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+PanelButton.Text = "Painel V1"
+PanelButton.Parent = ScreenGui
+
+-- Alterna a visibilidade do painel ao clicar no botão
+PanelButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- Função de Teleporte (Exemplo)
+local function Teleport(location)
+    local player = game.Players.LocalPlayer
+    if player and player.Character then
+        player.Character.HumanoidRootPart.CFrame = location
+    end
+end
+
+-- Botão de Teleporte
+local TeleportButton = Instance.new("TextButton")
+TeleportButton.Size = UDim2.new(0, 180, 0, 40)
+TeleportButton.Position = UDim2.new(0.5, -90, 0, 60)
+TeleportButton.Text = "Teleporte para o Spawn"
+TeleportButton.Parent = MainFrame
+TeleportButton.MouseButton1Click:Connect(function()
+    Teleport(CFrame.new(0, 10, 0))  -- Ajuste a posição conforme necessário
+end)
+
+-- Função de ESP
+local ESPEnabled = false
+local function EnableESP()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer and player.Character then
+            if player.Character:FindFirstChild("HumanoidRootPart") then
+                local highlight = Instance.new("BoxHandleAdornment")
+                highlight.Size = player.Character.HumanoidRootPart.Size + Vector3.new(0.5, 0.5, 0.5)
+                highlight.Color3 = Color3.fromRGB(144, 238, 144) -- Verde claro
+                highlight.AlwaysOnTop = true
+                highlight.ZIndex = 10
+                highlight.Adornee = player.Character.HumanoidRootPart
+                highlight.Parent = player.Character.HumanoidRootPart
+            end
+        end
+    end
+end
+
+local function DisableESP()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            for _, adornment in pairs(player.Character.HumanoidRootPart:GetChildren()) do
+                if adornment:IsA("BoxHandleAdornment") then
+                    adornment:Destroy()
+                end
+            end
+        end
+    end
+end
+
+-- Botão de ESP
+local ESPButton = Instance.new("TextButton")
+ESPButton.Size = UDim2.new(0, 180, 0, 40)
+ESPButton.Position = UDim2.new(0.5, -90, 0, 120)
+ESPButton.Text = "Ativar ESP de Jogadores"
+ESPButton.Parent = MainFrame
+ESPButton.MouseButton1Click:Connect(function()
+    ESPEnabled = not ESPEnabled
+    if ESPEnabled then
+        ESPButton.Text = "Desativar ESP"
+        EnableESP()
+    else
+        ESPButton.Text = "Ativar ESP de Jogadores"
+        DisableESP()
+    end
+end)
+
+-- Função de velocidade
+local SpeedTextBox = Instance.new("TextBox")
+SpeedTextBox.Size = UDim2.new(0, 180, 0, 40)
+SpeedTextBox.Position = UDim2.new(0.5, -90, 0, 180)
+SpeedTextBox.PlaceholderText = "Digite a Velocidade"
+SpeedTextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+SpeedTextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SpeedTextBox.Parent = MainFrame
+
+local SpeedButton = Instance.new("TextButton")
+SpeedButton.Size = UDim2.new(0, 180, 0, 40)
+SpeedButton.Position = UDim2.new(0.5, -90, 0, 240)
+SpeedButton.Text = "Aplicar Velocidade"
+SpeedButton.Parent = MainFrame
+SpeedButton.MouseButton1Click:Connect(function()
+    local speed = tonumber(SpeedTextBox.Text)
+    if speed and game.Players.LocalPlayer.Character then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    else
+        warn("Por favor, insira um número válido.")
+    end
+end)
+
+-- Função de voar
+local flying = false
+local bodyGyro, bodyVelocity
+
+local function Fly()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local humanoid = character:FindFirstChild("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    
+    if flying then
+        -- Já está voando, então desliga
+        flying = false
+        if bodyGyro then bodyGyro:Destroy() end
+        if bodyVelocity then bodyVelocity:Destroy() end
+    else
+        -- Inicia o voo
+        flying = true
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+        bodyGyro.CFrame = character.HumanoidRootPart.CFrame
+        bodyGyro.Parent = character.HumanoidRootPart
+        
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+        bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Velocidade para começar a subir
+        bodyVelocity.Parent = character.HumanoidRootPart
+    end
+end
+
+-- Botão de Voar
+local FlyButton = Instance.new("TextButton")
+FlyButton.Size = UDim2.new(0, 180, 0, 40)
+FlyButton.Position = UDim2.new(0.5, -90, 0, 300)
+FlyButton.Text = "Ativar Voar"
+FlyButton.Parent = MainFrame
+
+FlyButton.MouseButton1Click:Connect(Fly)
