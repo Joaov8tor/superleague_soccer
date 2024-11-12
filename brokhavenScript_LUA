@@ -5,8 +5,8 @@ ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
 
 -- Criação do frame principal do painel
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 300, 0, 500)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -250)
+MainFrame.Size = UDim2.new(0, 300, 0, 600)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -300)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.Visible = false  -- Inicialmente oculto
 MainFrame.Parent = ScreenGui
@@ -34,46 +34,132 @@ PanelButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Função Power Jump
-local function setJumpPower(jumpPower)
-    local player = game.Players.LocalPlayer
-    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.JumpPower = jumpPower
+-- Variáveis globais
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Função para alterar a velocidade
+local function setSpeed(speed)
+    if character:FindFirstChild("Humanoid") then
+        character.Humanoid.WalkSpeed = speed
     end
 end
 
--- TextBox para configurar o Power Jump
+-- Função para voar
+local flying = false
+local bodyVelocity = nil
+local bodyGyro = nil
+
+local function toggleFly()
+    if flying then
+        flying = false
+        if bodyVelocity then
+            bodyVelocity:Destroy()
+        end
+        if bodyGyro then
+            bodyGyro:Destroy()
+        end
+    else
+        flying = true
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        bodyVelocity.Parent = character.HumanoidRootPart
+        
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+        bodyGyro.CFrame = character.HumanoidRootPart.CFrame
+        bodyGyro.Parent = character.HumanoidRootPart
+    end
+end
+
+-- Função para Power Jump
+local function setJumpPower(jumpPower)
+    if character:FindFirstChild("Humanoid") then
+        character.Humanoid.JumpPower = jumpPower
+    end
+end
+
+-- Função de ESP (Exemplo de como destacar itens ou jogadores)
+local function createESP(target)
+    local espBox = Instance.new("BillboardGui")
+    espBox.Size = UDim2.new(0, 200, 0, 50)
+    espBox.Adornee = target
+    espBox.Parent = target
+
+    local espText = Instance.new("TextLabel")
+    espText.Size = UDim2.new(1, 0, 1, 0)
+    espText.BackgroundTransparency = 1
+    espText.Text = target.Name
+    espText.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Cor verde claro
+    espText.TextSize = 14
+    espText.Parent = espBox
+end
+
+-- Botões no painel para interagir com as funções
+local SpeedBox = Instance.new("TextBox")
+SpeedBox.Size = UDim2.new(0, 180, 0, 40)
+SpeedBox.Position = UDim2.new(0.5, -90, 0, 60)
+SpeedBox.PlaceholderText = "Velocidade"
+SpeedBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+SpeedBox.Parent = MainFrame
+
+local SpeedButton = Instance.new("TextButton")
+SpeedButton.Size = UDim2.new(0, 180, 0, 40)
+SpeedButton.Position = UDim2.new(0.5, -90, 0, 100)
+SpeedButton.Text = "Alterar Velocidade"
+SpeedButton.Parent = MainFrame
+SpeedButton.MouseButton1Click:Connect(function()
+    local speed = tonumber(SpeedBox.Text)
+    if speed then
+        setSpeed(speed)
+    else
+        warn("Digite um número válido para a velocidade.")
+    end
+end)
+
+local FlyButton = Instance.new("TextButton")
+FlyButton.Size = UDim2.new(0, 180, 0, 40)
+FlyButton.Position = UDim2.new(0.5, -90, 0, 150)
+FlyButton.Text = "Alternar Voar"
+FlyButton.Parent = MainFrame
+FlyButton.MouseButton1Click:Connect(function()
+    toggleFly()
+end)
+
 local JumpPowerBox = Instance.new("TextBox")
 JumpPowerBox.Size = UDim2.new(0, 180, 0, 40)
-JumpPowerBox.Position = UDim2.new(0.5, -90, 0, 320)
+JumpPowerBox.Position = UDim2.new(0.5, -90, 0, 200)
 JumpPowerBox.PlaceholderText = "Altura do Pulo"
 JumpPowerBox.Text = ""
 JumpPowerBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 JumpPowerBox.TextColor3 = Color3.fromRGB(0, 0, 0)
 JumpPowerBox.Parent = MainFrame
 
--- Botão para aplicar o Power Jump
-local PowerJumpButton = Instance.new("TextButton")
-PowerJumpButton.Size = UDim2.new(0, 180, 0, 40)
-PowerJumpButton.Position = UDim2.new(0.5, -90, 0, 370)
-PowerJumpButton.Text = "Aplicar Power Jump"
-PowerJumpButton.Parent = MainFrame
-PowerJumpButton.MouseButton1Click:Connect(function()
+local JumpButton = Instance.new("TextButton")
+JumpButton.Size = UDim2.new(0, 180, 0, 40)
+JumpButton.Position = UDim2.new(0.5, -90, 0, 240)
+JumpButton.Text = "Aplicar Power Jump"
+JumpButton.Parent = MainFrame
+JumpButton.MouseButton1Click:Connect(function()
     local jumpPower = tonumber(JumpPowerBox.Text)
     if jumpPower then
         setJumpPower(jumpPower)
     else
-        warn("Por favor, insira um número válido para a altura do pulo.")
+        warn("Digite um número válido para o Power Jump.")
     end
 end)
 
--- Botão para carregar o LocalHub com script externo
-local LocalHubButton = Instance.new("TextButton")
-LocalHubButton.Size = UDim2.new(0, 180, 0, 40)
-LocalHubButton.Position = UDim2.new(0.5, -90, 0, 420)
-LocalHubButton.Text = "Carregar LocalHub"
-LocalHubButton.Parent = MainFrame
-LocalHubButton.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Joaov8tor/superleague_soccer/refs/heads/main/brokhavenScript_LUA"))()
+-- ESP Button
+local ESPButton = Instance.new("TextButton")
+ESPButton.Size = UDim2.new(0, 180, 0, 40)
+ESPButton.Position = UDim2.new(0.5, -90, 0, 290)
+ESPButton.Text = "Ativar ESP"
+ESPButton.Parent = MainFrame
+ESPButton.MouseButton1Click:Connect(function()
+    -- Ativar ESP para todos os jogadores
+    for _, player in pairs(game.Players:GetPlayers()) do
+        createESP(player.Character or player.CharacterAdded:Wait())
+    end
 end)
-
