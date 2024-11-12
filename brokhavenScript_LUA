@@ -119,15 +119,14 @@ SpeedButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Botão de Voo com texto atualizado
 local FlyButton = Instance.new("TextButton")
 FlyButton.Size = UDim2.new(0, 180, 0, 40)
 FlyButton.Position = UDim2.new(0.5, -90, 0, 150)
-FlyButton.Text = "Alternar Voar"
+FlyButton.Text = "Voo disponível em breve"  -- Texto atualizado
 FlyButton.Parent = MainFrame
-FlyButton.MouseButton1Click:Connect(function()
-    toggleFly()
-end)
 
+-- Power Jump
 local JumpPowerBox = Instance.new("TextBox")
 JumpPowerBox.Size = UDim2.new(0, 180, 0, 40)
 JumpPowerBox.Position = UDim2.new(0.5, -90, 0, 200)
