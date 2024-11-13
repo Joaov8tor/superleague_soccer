@@ -80,7 +80,7 @@ local function setJumpPower(jumpPower)
     end
 end
 
--- Função de ESP (Exemplo de como destacar itens ou jogadores)
+-- Função para ESP (Exemplo de como destacar itens ou jogadores)
 local function createESP(target)
     local espBox = Instance.new("BillboardGui")
     espBox.Size = UDim2.new(0, 200, 0, 50)
@@ -94,6 +94,18 @@ local function createESP(target)
     espText.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Cor verde claro
     espText.TextSize = 14
     espText.Parent = espBox
+end
+
+-- Função de Teleporte para o Spawn
+local function teleportToSpawn()
+    -- Supondo que o ponto de spawn seja o ponto inicial do mapa
+    -- Podemos teleportar para as coordenadas 0, 0, 0 ou para outro ponto de spawn específico
+    local spawnLocation = game.Workspace:WaitForChild("SpawnLocation") -- Substitua isso pelo nome correto do spawn se necessário
+    if spawnLocation then
+        character:SetPrimaryPartCFrame(spawnLocation.CFrame)
+    else
+        warn("Spawn location não encontrado!")
+    end
 end
 
 -- Botões no painel para interagir com as funções
@@ -162,3 +174,14 @@ ESPButton.MouseButton1Click:Connect(function()
         createESP(player.Character or player.CharacterAdded:Wait())
     end
 end)
+
+-- Novo botão de Teleporte para o Spawn
+local TeleportButton = Instance.new("TextButton")
+TeleportButton.Size = UDim2.new(0, 180, 0, 40)
+TeleportButton.Position = UDim2.new(0.5, -90, 0, 340)
+TeleportButton.Text = "Teleporte para o Spawn"
+TeleportButton.Parent = MainFrame
+TeleportButton.MouseButton1Click:Connect(function()
+    teleportToSpawn()
+end)
+
